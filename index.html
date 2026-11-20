@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Miðvikudagsboltinn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Útlit: einn mjór dálkur fyrir síma. Grænn haus eins og gervigras undir flóðljósum
+   með miðlínu og miðjuhring, síðan „leikskýrsla“ með 12 númeruðum sætum þar sem 8 þarf til að ná bolta. */
+:root {
+  --bg: #EDF1EB;
+  --surface: #FFFFFF;
+  --ink: #13201A;
+  --muted: #56685D;
+  --line: #D5DDD6;
+  --turf: #1C6B42;
+  --on-turf: #FFFFFF;
+  --turf-soft: #DFEDE3;
+  --hero: #165936;
+  --on-hero: #F2F8F4;
+  --chalk: rgba(255, 255, 255, 0.18);
+  --amber: #9A5A00;
+  --amber-soft: #FBEED3;
+  --slot: #DCE4DE;
+  --focus: #2F7DE1;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0C1410;
+    --surface: #141F19;
+    --ink: #E4ECE6;
+    --muted: #94A69B;
+    --line: #26342C;
+    --turf: #3DA56C;
+    --on-turf: #06120B;
+    --turf-soft: #18301F;
+    --hero: #11301F;
+    --on-hero: #EAF4EE;
+    --chalk: rgba(255, 255, 255, 0.11);
+    --amber: #F0B44C;
+    --amber-soft: #33270F;
+    --slot: #1F2C25;
+    --focus: #6AA8F5;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.45 var(--body);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+[hidden] { display: none !important; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.eyebrow {
+  margin: 0;
+  font: 600 13px/1.2 var(--body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.fine { margin: 0; font-size: 14px; color: var(--muted); }
+.link {
+  border: 0;
+  background: none;
+  padding: 6px 2px;
+  font-weight: 600;
+  color: var(--turf);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Grasflötur (haus og innskráning) ---------- */
+.pitch {
+  position: relative;
+  overflow: hidden;
+  background: var(--hero);
+  color: var(--on-hero);
+}
+.pitch::before {           /* miðlína */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 72px;
+  width: 2px;
+  background: var(--chalk);
+}
+.pitch::after {            /* miðjuhringur */
+  content: "";
+  position: absolute;
+  right: -7px;
+  top: 50%;
+  width: 160px;
+  height: 160px;
+  margin-top: -80px;
+  border: 2px solid var(--chalk);
+  border-radius: 50%;
+}
+.pitch > * { position: relative; z-index: 1; }
+
+.hero { padding-top: env(safe-area-inset-top, 0px); }
+.hero .wrap { padding-block: 22px 24px; display: grid; gap: 6px; }
+.hero h1 {
+  margin: 2px 0 0;
+  font: 700 clamp(30px, 8.5vw, 42px)/1.02 var(--display);
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+.hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-weight: 500; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: 700 13px/1.4 var(--body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pill.go { background: var(--on-hero); color: var(--hero); }
+.pill.need { background: var(--amber-soft); color: var(--amber); }
+.pill.full { background: transparent; color: var(--on-hero); box-shadow: inset 0 0 0 1.5px var(--on-hero); }
+.pill.closed { background: rgba(0, 0, 0, 0.25); color: var(--on-hero); }
+
+/* ---------- Aðalsvæði ---------- */
+.main { padding-block: 16px calc(40px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  min-width: 0;
+}
+.label { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+/* Talning og 12 sæti */
+.tally-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.count { font: 700 56px/0.95 var(--display); font-variant-numeric: tabular-nums; }
+.count .of { font-size: 26px; color: var(--muted); margin-left: 4px; }
+.tally-msg { margin: 0; font-weight: 600; }
+.tally-msg.need { color: var(--amber); }
+.tally-msg.go { color: var(--turf); }
+
+.slots, .scale { display: grid; grid-template-columns: repeat(var(--cols, 12), minmax(0, 1fr)); gap: 4px; }
+.slots { margin-top: 14px; }
+.slot {
+  position: relative;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--slot);
+  display: grid;
+  place-items: center;
+  font: 700 14px/1 var(--display);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.25s ease;
+}
+.slot.filled { background: var(--turf); color: var(--on-turf); }
+.slot.threshold::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+}
+.scale { margin-top: 8px; font-size: 12px; color: var(--muted); }
+.scale span { text-align: right; white-space: nowrap; }
+
+/* Þín skráning */
+.me-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.me-name { font: 700 22px/1.15 var(--display); letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.seg-btn {
+  min-height: 54px;
+  padding: 6px 4px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.1;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.seg-btn:hover:not(:disabled) { border-color: var(--muted); }
+.seg-btn[aria-pressed="true"][data-k="out"] { background: var(--slot); border-color: var(--muted); }
+.seg-btn[aria-pressed="true"][data-k="maybe"] { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.seg-btn[aria-pressed="true"][data-k="in"] { background: var(--turf); border-color: var(--turf); color: var(--on-turf); }
+.seg-btn.pending { opacity: 0.6; cursor: progress; }
+.seg-btn:disabled { cursor: not-allowed; opacity: 0.55; }
+.me-note { margin: 12px 0 0; }
+.me-stats { margin: 4px 0 0; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Flipar */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--slot);
+}
+.tabs button {
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  padding: 10px 8px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tabs button[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Leikskýrsla */
+.panel { display: grid; gap: 18px; }
+.panel h2 {
+  margin: 0 0 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font: 700 20px/1.2 var(--display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.panel h2 small { font: 600 14px var(--body); color: var(--muted); letter-spacing: 0; text-transform: none; }
+.roster { list-style: none; margin: 0; padding: 0; }
+.roster li.row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+.roster li.row:last-child { border-bottom: 0; }
+.num {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--turf-soft);
+  color: var(--turf);
+  font: 700 17px/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.row.empty .num { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); }
+.row.empty .name { color: var(--muted); }
+.wait .num { background: var(--slot); color: var(--muted); }
+.name { min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+.you {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: 2px;
+}
+.roster li.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--turf);
+}
+.roster li.divider::before, .roster li.divider::after {
+  content: "";
+  flex: 1;
+  border-top: 2px dashed var(--turf);
+  opacity: 0.6;
+}
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--slot);
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.chips.maybe li { background: var(--amber-soft); color: var(--amber); }
+.chips li.mine { box-shadow: inset 0 0 0 1.5px currentColor; }
+details summary {
+  cursor: pointer;
+  font: 700 20px/1.2 var(--display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 2px 0;
+}
+details summary small { font: 600 14px var(--body); letter-spacing: 0; text-transform: none; margin-left: 4px; }
+details[open] summary { margin-bottom: 8px; }
+
+/* Stigatafla */
+.table-wrap { overflow-x: auto; margin: 0 -4px; }
+table.board { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.board th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.board td { padding: 9px 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.board tr:last-child td { border-bottom: 0; }
+.board .r { text-align: right; }
+.board td.name { font-weight: 500; }
+.board tr.mine td { background: var(--turf-soft); }
+.board tr.mine td:first-child { border-radius: 8px 0 0 8px; }
+.board tr.mine td:last-child { border-radius: 0 8px 8px 0; }
+.rank {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font: 700 16px/1 var(--display);
+}
+.rank.top { background: var(--turf); color: var(--on-turf); }
+.rate { display: inline-grid; gap: 3px; justify-items: end; }
+.bar { width: 40px; height: 4px; border-radius: 2px; background: var(--slot); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--turf); }
+.dash { color: var(--muted); }
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 16px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------- Innskráning ---------- */
+.gate {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding-block: calc(24px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.gate-inner { width: 100%; max-width: 380px; display: grid; gap: 22px; }
+.gate h1 { margin: 6px 0 0; font: 700 clamp(32px, 9.5vw, 52px)/0.98 var(--display); letter-spacing: 0.01em; }
+.gate-card {
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 16px;
+  padding: 20px;
+  display: grid;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.gate-card label { font-weight: 600; }
+.input {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  font-size: 18px;
+}
+.input:focus { border-color: var(--turf); outline: none; box-shadow: 0 0 0 3px var(--turf-soft); }
+.primary {
+  min-height: 50px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--turf);
+  color: var(--on-turf);
+  font-weight: 700;
+  font-size: 17px;
+}
+.primary:disabled { opacity: 0.6; cursor: progress; }
+.primary.reload { display: inline-grid; place-items: center; padding: 0 22px; text-decoration: none; }
+.error { margin: 0; min-height: 1.4em; color: #C0392B; font-weight: 600; font-size: 15px; }
+@media (prefers-color-scheme: dark) { .error { color: #FF8A7A; } }
+.gate .fine { color: var(--on-hero); opacity: 0.85; text-align: center; }
+
+/* ---------- Nafnaval ---------- */
+.picker { padding-block: calc(24px + env(safe-area-inset-top, 0px)) 40px; display: grid; gap: 12px; }
+.picker h1 { margin: 0; font: 700 34px/1.05 var(--display); }
+.picker p { margin: 0; }
+.names {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.names li + li { border-top: 1px solid var(--line); }
+.names button {
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 14px 16px;
+  font-weight: 500;
+}
+.names button:hover { background: var(--turf-soft); }
+
+/* ---------- Hleðsla og skilaboð ---------- */
+.loading { min-height: 60vh; display: grid; place-items: center; gap: 12px; text-align: center; color: var(--muted); padding: 24px; }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  width: max-content;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  z-index: 20;
+}
+
+/* ---------- Aukamenn ---------- */
+.guests {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 10px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 10px;
+  background: var(--turf-soft);
+}
+.guests > span { font-weight: 600; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button {
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+.stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+.stepper output {
+  min-width: 34px;
+  text-align: center;
+  font: 700 24px/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.host { color: var(--muted); font-weight: 400; }
+.row.guest .num { background: transparent; box-shadow: inset 0 0 0 1.5px var(--turf); }
+
+/* ---------- Lokaðir miðvikudagar ---------- */
+.notice { border-color: var(--amber); background: var(--amber-soft); display: grid; gap: 4px; }
+.notice p { margin: 0; }
+.notice strong { color: var(--amber); }
+
+/* ---------- FYI ---------- */
+.fyi { display: grid; gap: 8px; padding-block: 12px; }
+.fyi.has-note { border-color: var(--turf); background: var(--turf-soft); }
+.fyi-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fyi-head .label { color: var(--turf); }
+.fyi-text { margin: 0; font-size: 17px; font-weight: 500; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fyi-form { display: grid; gap: 8px; }
+.fyi-form textarea { min-height: 96px; resize: vertical; font-size: 16px; line-height: 1.4; background: var(--surface); }
+.fyi-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.fyi-actions .fine { margin-right: auto; font-variant-numeric: tabular-nums; }
+.fyi-actions .primary { min-height: 44px; padding: 0 20px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Bæta við nafni ---------- */
+.add-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+}
+.add-form label { font-weight: 600; }
+.add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.add-row .primary { padding: 0 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Hleðsla -->
+<div id="loading" class="loading">
+  <div id="loadingText">Sæki skráningar…</div>
+  <button id="retry" class="link" hidden>Reyna aftur</button>
+  <a id="reloadLink" class="primary reload" href="#" target="_top" hidden>Opna nýju útgáfuna</a>
+</div>
+
+<!-- Aðgangskóði -->
+<div id="gate" class="gate pitch" hidden>
+  <div class="gate-inner">
+    <div>
+      <p class="eyebrow">Miðvikudagar kl. 21:00</p>
+      <h1>Miðvikudags&shy;boltinn</h1>
+    </div>
+    <form id="gateForm" class="gate-card" novalidate>
+      <label for="codeInput">Aðgangskóði</label>
+      <input id="codeInput" class="input" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go">
+      <button id="gateBtn" class="primary" type="submit">Opna</button>
+      <p id="gateError" class="error" role="alert"></p>
+    </form>
+    <p class="fine">Kóðann færðu í Facebook-hópnum.</p>
+  </div>
+</div>
+
+<!-- Hver ert þú? -->
+<div id="picker" hidden>
+  <div class="wrap picker">
+    <h1>Hver ert þú?</h1>
+    <p>Veldu nafnið þitt. Síminn man það næst.</p>
+    <input id="pickerFilter" class="input" type="search" placeholder="Leita að nafni" autocomplete="off">
+    <ul id="pickerList" class="names"></ul>
+    <form id="addForm" class="add-form" novalidate>
+      <label for="addName">Ekki á listanum? Bættu þér við</label>
+      <div class="add-row">
+        <input id="addName" class="input" type="text" placeholder="Fullt nafn" autocomplete="name" maxlength="60">
+        <button id="addBtn" class="primary" type="submit">Bæta við</button>
+      </div>
+      <p id="addError" class="error" role="alert"></p>
+    </form>
+    <button id="pickerBack" class="link" type="button" hidden>Til baka</button>
+  </div>
+</div>
+
+<!-- Appið -->
+<div id="app" hidden>
+  <header class="hero pitch">
+    <div class="wrap">
+      <p class="eyebrow">Miðvikudagsboltinn</p>
+      <h1 id="heroDate">Miðvikudagur</h1>
+      <div class="hero-meta">
+        <span id="heroWhen">Kl. 21:00</span>
+        <span id="heroPill" class="pill"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap main">
+    <section id="notice" class="card notice" role="status" hidden></section>
+
+    <section id="fyi" class="card fyi" aria-labelledby="fyiLabel">
+      <div class="fyi-head">
+        <div><span id="fyiLabel" class="label">FYI</span> <span id="fyiEmpty" class="fine">Engin skilaboð</span></div>
+        <button id="fyiEdit" class="link" type="button">Bæta við</button>
+      </div>
+      <p id="fyiText" class="fyi-text" hidden></p>
+      <p id="fyiMeta" class="fine" hidden></p>
+      <form id="fyiForm" class="fyi-form" hidden novalidate>
+        <label for="fyiInput" class="sr-only">Skilaboð til hópsins</label>
+        <textarea id="fyiInput" class="input" rows="3" maxlength="500" placeholder="T.d. Enginn bolti 23. des, salurinn er lokaður"></textarea>
+        <div class="fyi-actions">
+          <span id="fyiCount" class="fine">0/500</span>
+          <button id="fyiCancel" class="link" type="button">Hætta við</button>
+          <button id="fyiSave" class="primary" type="submit">Vista</button>
+        </div>
+        <p class="fine">Allir í hópnum sjá skilaboðin og geta breytt þeim. Tæmdu reitinn og vistaðu til að fjarlægja þau.</p>
+        <p id="fyiError" class="error" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="countLabel">
+      <div class="tally-top">
+        <div class="count" id="countLabel"><span id="count">0</span><span class="of" id="countOf">/ 12</span></div>
+        <p id="tallyMsg" class="tally-msg"></p>
+      </div>
+      <div id="slots" class="slots" aria-hidden="true"></div>
+      <div id="scale" class="scale" aria-hidden="true"></div>
+    </section>
+
+    <section class="card">
+      <div class="me-head">
+        <div>
+          <div class="label">Þín skráning</div>
+          <div id="meName" class="me-name"></div>
+        </div>
+        <button id="switchMe" class="link" type="button">Ekki þú?</button>
+      </div>
+      <div class="seg" role="group" aria-label="Þín skráning">
+        <button class="seg-btn" type="button" data-k="out" data-status="Mæti ekki" aria-pressed="false">Mæti ekki</button>
+        <button class="seg-btn" type="button" data-k="maybe" data-status="Kannski" aria-pressed="false">Kannski</button>
+        <button class="seg-btn" type="button" data-k="in" data-status="Mæti" aria-pressed="false">Mæti</button>
+      </div>
+      <div id="guestRow" class="guests" hidden>
+        <span>Kem með aukamenn</span>
+        <div class="stepper">
+          <button id="guestMinus" type="button" aria-label="Fækka aukamönnum">−</button>
+          <output id="guestCount" aria-live="polite">0</output>
+          <button id="guestPlus" type="button" aria-label="Fjölga aukamönnum">+</button>
+        </div>
+      </div>
+      <p id="meNote" class="me-note"></p>
+      <p id="meStats" class="me-stats"></p>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Sýn">
+      <button id="tab-list" role="tab" type="button" aria-selected="true" aria-controls="panel-list">Listinn</button>
+      <button id="tab-board" role="tab" type="button" aria-selected="false" aria-controls="panel-board">Stigatafla</button>
+    </div>
+
+    <section id="panel-list" class="card panel" role="tabpanel" aria-labelledby="tab-list">
+      <div>
+        <h2>Mæta <small id="rosterCount"></small></h2>
+        <ol id="roster" class="roster"></ol>
+      </div>
+      <div id="waitWrap" hidden>
+        <h2>Biðlisti <small id="waitCount"></small></h2>
+        <ol id="waitList" class="roster wait"></ol>
+      </div>
+      <div id="maybeWrap" hidden>
+        <h2>Kannski <small id="maybeCount"></small></h2>
+        <ul id="maybeList" class="chips maybe"></ul>
+      </div>
+      <details id="outWrap">
+        <summary>Mæta ekki <small id="outCount"></small></summary>
+        <ul id="outList" class="chips"></ul>
+      </details>
+    </section>
+
+    <section id="panel-board" class="card panel" role="tabpanel" aria-labelledby="tab-board" hidden>
+      <p id="boardSum" style="margin:0"></p>
+      <div id="boardTable" class="table-wrap">
+        <table class="board">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Leikmaður</th>
+              <th class="r">Mætt</th>
+              <th class="r" title="Mætingarhlutfall">%</th>
+              <th class="r">Röð</th>
+            </tr>
+          </thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+      <p class="fine">Leikur telst spilaður þegar minnst 8 skrá sig „Mæti“. Hlutfall er fjöldi leikja sem þú mættir í deilt með fjölda leikja síðan þú byrjaðir. „Röð“ er fjöldi leikja í röð sem þú hefur mætt í.</p>
+    </section>
+
+    <footer class="foot">
+      <span id="updated"></span>
+      <button id="refresh" class="link" type="button">Uppfæra</button>
+      <button id="logout" class="link" type="button">Skrá út</button>
+    </footer>
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* Kemur í stað google.script.run: POST á Apps Script án vafrakaka (credentials: 'omit'). */
+(function () {
+  var EXEC_URL = "https://script.google.com/macros/s/AKfycbxqJVe7zDgo2Lx-7k9AkVq1CeRqRJ17auqXnj1Jii0mAl8tBRsYs12JPC9xvdp1CT-_/exec";
+  function call(name, args) {
+    return fetch(EXEC_URL, {
+      method: 'POST',
+      credentials: 'omit',
+      body: JSON.stringify({ fn: name, args: args })   // text/plain: engin CORS-forathugun
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (res) {
+      // Ef síðan er úrelt á „Opna nýju útgáfuna“ að opna þessa síðu aftur, ekki Apps Script slóðina.
+      if (res && typeof res === 'object' && 'url' in res) res.url = location.href.split('#')[0];
+      return res;
+    });
+  }
+  function runner(ok, fail) {
+    return new Proxy({}, { get: function (_, name) {
+      if (name === 'withSuccessHandler') return function (h) { return runner(h, fail); };
+      if (name === 'withFailureHandler') return function (h) { return runner(ok, h); };
+      return function () {
+        call(name, Array.prototype.slice.call(arguments)).then(
+          function (r) { ok && ok(r); },
+          function (e) { fail && fail(e); });
+      };
+    }});
+  }
+  window.google = { script: { run: runner(null, null) } };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+
+  var KEY_CODE = 'mvb.kodi';
+  var KEY_ME = 'mvb.eg';
+  var MONTHS = ['janúar', 'febrúar', 'mars', 'apríl', 'maí', 'júní', 'júlí', 'ágúst', 'september', 'október', 'nóvember', 'desember'];
+  var POLL_MS = 60000;
+  var API_VERSION = 4;   // sama tala og API_VERSION í Code.gs
+  var stale = false;
+
+  var store = {
+    get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) {} },
+    del: function (k) { try { window.localStorage.removeItem(k); } catch (e) {} }
+  };
+
+  var code = store.get(KEY_CODE) || '';
+  var me = store.get(KEY_ME) || '';
+  var state = null;
+  var names = {};
+  var lastLoad = 0;
+  var busy = false;
+  var collator = window.Intl && Intl.Collator ? new Intl.Collator('is') : null;
+
+  function $(id) { return document.getElementById(id); }
+  function cmp(a, b) { return collator ? collator.compare(a, b) : (a < b ? -1 : a > b ? 1 : 0); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  function plural(n, one, many) { return (n % 10 === 1 && n % 100 !== 11) ? one : many; }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dateLabel(iso) {
+    var p = iso.split('-');
+    return parseInt(p[2], 10) + '. ' + MONTHS[parseInt(p[1], 10) - 1];
+  }
+  function isoDay(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  function dayDiff(a, b) {
+    var pa = a.split('-'), pb = b.split('-');
+    return Math.round((Date.UTC(+pb[0], pb[1] - 1, +pb[2]) - Date.UTC(+pa[0], pa[1] - 1, +pa[2])) / 86400000);
+  }
+  function hhmm(ms) { var d = new Date(ms); return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()); }
+
+  function api(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (resolve, reject) {
+      var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+      runner[fn].apply(runner, args);
+    });
+  }
+
+  function show(id) {
+    ['loading', 'gate', 'picker', 'app'].forEach(function (s) { $(s).hidden = s !== id; });
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    if (!msg) return;
+    var t = $('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 3200);
+  }
+
+  /* ---------- Gögn ---------- */
+
+  /** Þjónninn hefur verið uppfærður en þessi síða er gömul: biðja um að opna hana aftur. */
+  function showStale(url) {
+    stale = true;
+    show('loading');
+    $('loadingText').textContent = 'Ný útgáfa af appinu er komin. Opnaðu síðuna aftur til að sjá réttan lista.';
+    $('retry').hidden = true;
+    var a = $('reloadLink');
+    if (url) { a.href = url; a.hidden = false; }
+  }
+
+  function accept(s) {
+    if (s.api !== API_VERSION) { showStale(s.url); return; }
+    state = s;
+    lastLoad = Date.now();
+    names = {};
+    s.players.forEach(function (p) { names[p.id] = p.name; });
+    if (me && !names[me]) { me = ''; store.del(KEY_ME); }
+    if (!me) { openPicker(); return; }
+    render();
+    show('app');
+  }
+
+  function toGate(msg) {
+    code = '';
+    store.del(KEY_CODE);
+    $('gateError').textContent = msg || '';
+    show('gate');
+    setTimeout(function () { $('codeInput').focus(); }, 50);
+  }
+
+  function handleDenied(s) {
+    if (s.error === 'bad_code' || s.error === 'no_code') { toGate(s.message); return true; }
+    return false;
+  }
+
+  function firstLoad() {
+    show('loading');
+    $('loadingText').textContent = 'Sæki skráningar…';
+    $('retry').hidden = true;
+    api('getState', code).then(function (s) {
+      if (!s.ok) { if (!handleDenied(s)) toGate(s.message); return; }
+      accept(s);
+    }).catch(function () {
+      $('loadingText').textContent = 'Náði ekki sambandi við þjóninn.';
+      $('retry').hidden = false;
+    });
+  }
+
+  function refresh(silent) {
+    if (busy || !code || stale) return;
+    api('getState', code).then(function (s) {
+      if (!s.ok) { handleDenied(s); return; }
+      if (!$('picker').hidden) { state = s; return; }
+      accept(s);
+      if (!silent) toast('Uppfært');
+    }).catch(function () { if (!silent) toast('Náði ekki sambandi. Reyndu aftur.'); });
+  }
+
+  function myGuests() { return (state && state.guests && state.guests[me]) || 0; }
+  function maxGuests() { return (state && state.settings.maxGuests) || 5; }
+
+  function choose(status, btn, guests) {
+    if (busy || !state || state.game.closed) return;
+    var before = state.statuses[me];
+    var guestChange = guests !== undefined;
+    if (!guestChange) guests = status === 'Mæti' ? myGuests() : 0;
+    busy = true;
+    btn.classList.add('pending');
+    api('setStatus', code, me, status, guests).then(function (s) {
+      if (!s.ok) {
+        if (handleDenied(s)) return;
+        if (s.error === 'no_player') { me = ''; store.del(KEY_ME); }
+        toast(s.message);
+        busy = false;
+        refresh(true);
+        return;
+      }
+      accept(s);
+      var st = s.statuses[me];
+      if (guestChange && (before === 'in' || before === 'wait')) toast(guests ? 'Aukamenn: ' + guests : 'Engir aukamenn');
+      else if (st === 'in') toast('Skráð: Mæti');
+      else if (st === 'wait') toast('Fullt. Þú ert á biðlista.');
+      else if (st === 'maybe') toast('Skráð: Kannski');
+      else toast('Skráð: Mæti ekki');
+    }).catch(function () {
+      toast('Náði ekki að vista. Athugaðu netið og reyndu aftur.');
+    }).then(function () {
+      busy = false;
+      btn.classList.remove('pending');
+    });
+  }
+
+  /* ---------- Teikning ---------- */
+
+  function render() {
+    var s = state;
+    var set = s.settings;
+    var g = s.game;
+    var L = s.lineup;
+    var n = L.playing.length;
+    var w = L.waiting.length;
+    var days = dayDiff(isoDay(s.now), g.date);
+
+    // Haus
+    $('heroDate').textContent = 'Miðvikudagur ' + dateLabel(g.date);
+    var when = g.closed ? 'Skráningu lokað' : days === 0 ? 'Í kvöld' : days === 1 ? 'Á morgun' : 'Eftir ' + days + ' daga';
+    $('heroWhen').textContent = 'Kl. 21:00 · ' + when;
+
+    var kind, pill, msg;
+    if (g.closed) {
+      kind = 'closed';
+      pill = n >= set.min ? 'Leikur í gangi' : 'Enginn bolti';
+      msg = n >= set.min ? n + ' ' + plural(n, 'leikmaður', 'leikmenn') + ' í kvöld.' : 'Lágmarkið náðist ekki í kvöld.';
+    } else if (n >= set.max) {
+      kind = 'full';
+      pill = 'Fullt';
+      msg = w ? 'Fullt. ' + w + ' á biðlista.' : 'Fullt. Næsti fer á biðlista.';
+    } else if (n >= set.min) {
+      kind = 'go';
+      pill = 'Bolti!';
+      var free = set.max - n;
+      msg = free + ' ' + plural(free, 'laust pláss', 'laus pláss') + ' eftir.';
+    } else {
+      kind = 'need';
+      pill = 'Vantar ' + (set.min - n);
+      msg = 'Vantar ' + (set.min - n) + ' til að ná bolta.';
+    }
+    var p = $('heroPill');
+    p.className = 'pill ' + kind;
+    p.textContent = pill;
+
+    // Talning og sæti
+    $('count').textContent = n;
+    $('countOf').textContent = '/ ' + set.max;
+    var tm = $('tallyMsg');
+    tm.textContent = msg;
+    tm.className = 'tally-msg ' + (kind === 'need' ? 'need' : kind === 'go' ? 'go' : '');
+
+    var slots = $('slots');
+    slots.style.setProperty('--cols', set.max);
+    slots.textContent = '';
+    for (var i = 1; i <= set.max; i++) {
+      var sl = el('div', 'slot' + (i <= n ? ' filled' : '') + (i === set.min && set.max > set.min ? ' threshold' : ''), String(i));
+      slots.appendChild(sl);
+    }
+    var scale = $('scale');
+    scale.style.setProperty('--cols', set.max);
+    scale.textContent = '';
+    var a = el('span', '', set.min + ' til að ná bolta');
+    a.style.gridColumn = '1 / ' + (set.min + 1);
+    scale.appendChild(a);
+    if (set.max > set.min) {
+      var b = el('span', '', 'hámark ' + set.max);
+      b.style.gridColumn = (set.min + 1) + ' / ' + (set.max + 1);
+      scale.appendChild(b);
+    }
+
+    // Þín skráning
+    var mine = s.statuses[me] || 'none';
+    $('meName').textContent = names[me] || '';
+    var pressed = (mine === 'in' || mine === 'wait') ? 'in' : mine === 'maybe' ? 'maybe' : 'out';
+    Array.prototype.forEach.call(document.querySelectorAll('.seg-btn'), function (btn) {
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-k') === pressed ? 'true' : 'false');
+      btn.disabled = g.closed;
+    });
+
+    var guests = myGuests();
+    $('guestRow').hidden = pressed !== 'in' || g.closed;
+    $('guestCount').textContent = String(guests);
+    $('guestMinus').disabled = guests <= 0;
+    $('guestPlus').disabled = guests >= maxGuests();
+
+    var note;
+    if (g.closed) note = 'Skráningu er lokað. Skráning fyrir næsta miðvikudag opnar á fimmtudaginn.';
+    else if (mine === 'in') note = 'Þú ert nr. ' + (unitIndex(L.playing, me) + 1) + ' á listanum.' + (n < set.min ? ' Fáðu fleiri með!' : '');
+    else if (mine === 'wait') note = 'Fullt í bili. Þú ert nr. ' + (unitIndex(L.waiting, me) + 1) + ' á biðlista og færist upp ef einhver hættir við.';
+    else if (mine === 'maybe') note = 'Kannski telst ekki með í lágmarkinu. Breyttu í „Mæti“ þegar þú veist.';
+    else if (mine === 'out') note = 'Þú mætir ekki í þetta sinn.';
+    else note = 'Þú hefur ekki svarað. Sjálfgefið er „Mæti ekki“.';
+    if (guests && !g.closed && (mine === 'in' || mine === 'wait')) {
+      var gout = L.waiting.filter(function (u) { return u.id === me && u.guest; }).length;
+      if (gout) note += ' ' + gout + ' ' + plural(gout, 'aukamaður', 'aukamenn') + ' frá þér á biðlista, því skráðir leikmenn ganga fyrir.';
+    }
+    $('meNote').textContent = note;
+
+    renderNotice(s);
+    renderFyi(s);
+
+    var row = null;
+    s.board.forEach(function (r) { if (r.id === me) row = r; });
+    if (row && row.eligible) {
+      var txt = 'Þín mæting: ' + row.attended + ' af ' + row.eligible + ' · ' + Math.round(row.rate * 100) + '%';
+      if (row.streak > 1) txt += ' · ' + row.streak + ' í röð';
+      $('meStats').textContent = txt;
+    } else {
+      $('meStats').textContent = '';
+    }
+
+    renderList(s);
+    renderBoard(s);
+    $('updated').textContent = 'Uppfært kl. ' + hhmm(s.now);
+  }
+
+  function unitIndex(units, id) {
+    for (var i = 0; i < units.length; i++) if (units[i].id === id && !units[i].guest) return i;
+    return -1;
+  }
+
+  /** Nafn í sæti: leikmaður, aukamaður („Gestur · nafn gestgjafa“) eða autt sæti. */
+  function unitName(u) {
+    var nm = el('span', 'name');
+    if (!u) { nm.textContent = 'Laust'; return nm; }
+    if (u.guest) {
+      nm.textContent = 'Gestur ';
+      nm.appendChild(el('span', 'host', '· ' + (names[u.id] || '?')));
+      return nm;
+    }
+    nm.textContent = names[u.id] || '?';
+    if (u.id === me) nm.appendChild(el('span', 'you', 'þú'));
+    return nm;
+  }
+
+  function renderNotice(s) {
+    var box = $('notice');
+    box.textContent = '';
+    (s.game.skipped || []).forEach(function (c) {
+      var p = el('p');
+      p.appendChild(el('strong', '', 'Enginn bolti miðvikudaginn ' + dateLabel(c.date) + '.'));
+      p.appendChild(document.createTextNode(' ' + c.reason));
+      box.appendChild(p);
+    });
+    if ((s.game.skipped || []).length) {
+      box.appendChild(el('p', '', 'Skráningin hér fyrir neðan er fyrir ' + dateLabel(s.game.date) + '.'));
+    }
+    box.hidden = !box.childNodes.length;
+  }
+
+  var editingNote = false;
+
+  function renderFyi(s) {
+    var n = s.note;
+    $('fyi').classList.toggle('has-note', !!n && !editingNote);
+    $('fyiEmpty').hidden = !!n || editingNote;
+    $('fyiText').hidden = !n || editingNote;
+    $('fyiMeta').hidden = !n || editingNote;
+    if (n) {
+      $('fyiText').textContent = n.text;
+      $('fyiMeta').textContent = 'Síðast breytt af ' + (n.byName || 'óþekktum') + ', ' + dateLabel(isoDay(n.at)) + ' kl. ' + hhmm(n.at);
+    }
+    $('fyiEdit').textContent = n ? 'Breyta' : 'Bæta við';
+    $('fyiEdit').hidden = editingNote;
+    $('fyiForm').hidden = !editingNote;
+  }
+
+  function fyiCount() { $('fyiCount').textContent = $('fyiInput').value.length + '/500'; }
+
+  function nameItem(id, cls) {
+    var li = el('li', cls);
+    li.textContent = names[id] || '?';
+    if (id === me) li.classList.add('mine');
+    return li;
+  }
+
+  function renderList(s) {
+    var set = s.settings;
+    var L = s.lineup;
+
+    $('rosterCount').textContent = L.playing.length + ' af ' + set.max;
+    var ol = $('roster');
+    ol.textContent = '';
+    for (var i = 0; i < set.max; i++) {
+      var u = L.playing[i];
+      var li = el('li', u ? (u.guest ? 'row guest' : 'row') : 'row empty');
+      li.appendChild(el('span', 'num', String(i + 1)));
+      li.appendChild(unitName(u));
+      ol.appendChild(li);
+      if (i + 1 === set.min && set.max > set.min) {
+        var d = el('li', 'divider', set.min + ' = bolti');
+        d.setAttribute('aria-hidden', 'true');
+        ol.appendChild(d);
+      }
+    }
+
+    $('waitWrap').hidden = !L.waiting.length;
+    $('waitCount').textContent = L.waiting.length ? String(L.waiting.length) : '';
+    var wl = $('waitList');
+    wl.textContent = '';
+    L.waiting.forEach(function (u, k) {
+      var li = el('li', u.guest ? 'row guest' : 'row');
+      li.appendChild(el('span', 'num', String(k + 1)));
+      li.appendChild(unitName(u));
+      wl.appendChild(li);
+    });
+
+    $('maybeWrap').hidden = !L.maybe.length;
+    $('maybeCount').textContent = L.maybe.length ? String(L.maybe.length) : '';
+    var ml = $('maybeList');
+    ml.textContent = '';
+    L.maybe.forEach(function (id) { ml.appendChild(nameItem(id, '')); });
+
+    var outs = s.players
+      .filter(function (p) { var st = s.statuses[p.id]; return st === 'out' || st === 'none'; })
+      .sort(function (x, y) { return cmp(x.name, y.name); });
+    $('outCount').textContent = String(outs.length);
+    var xl = $('outList');
+    xl.textContent = '';
+    outs.forEach(function (p) { xl.appendChild(nameItem(p.id, '')); });
+  }
+
+  function renderBoard(s) {
+    var gp = s.gamesPlayed;
+    $('boardSum').textContent = gp
+      ? gp + ' ' + plural(gp, 'leikur spilaður', 'leikir spilaðir') + ' síðan ' + dateLabel(s.firstGame) + '.'
+      : 'Engir leikir taldir enn. Taflan fyllist eftir fyrsta miðvikudaginn þar sem ' + s.settings.min + ' eða fleiri mæta.';
+    $('boardTable').hidden = !gp;
+
+    var tb = $('boardBody');
+    tb.textContent = '';
+    s.board.forEach(function (r) {
+      var tr = el('tr', r.id === me ? 'mine' : '');
+      var td0 = el('td');
+      if (r.rank) td0.appendChild(el('span', 'rank' + (r.rank <= 3 && r.attended ? ' top' : ''), String(r.rank)));
+      else td0.appendChild(el('span', 'dash', '–'));
+      tr.appendChild(td0);
+      tr.appendChild(el('td', 'name', names[r.id]));
+      tr.appendChild(el('td', 'r', r.eligible ? String(r.attended) : '–'));
+      var td3 = el('td', 'r');
+      if (r.eligible) {
+        var pct = Math.round(r.rate * 100);
+        var box = el('span', 'rate');
+        box.appendChild(el('span', '', pct + '%'));
+        var bar = el('span', 'bar');
+        var fill = el('i');
+        fill.style.width = pct + '%';
+        bar.appendChild(fill);
+        box.appendChild(bar);
+        td3.appendChild(box);
+      } else {
+        td3.appendChild(el('span', 'dash', '–'));
+      }
+      tr.appendChild(td3);
+      tr.appendChild(el('td', 'r', r.eligible ? String(r.streak) : '–'));
+      tb.appendChild(tr);
+    });
+  }
+
+  function setTab(which) {
+    var list = which === 'list';
+    $('tab-list').setAttribute('aria-selected', list ? 'true' : 'false');
+    $('tab-board').setAttribute('aria-selected', list ? 'false' : 'true');
+    $('panel-list').hidden = !list;
+    $('panel-board').hidden = list;
+  }
+
+  /* ---------- Nafnaval ---------- */
+
+  function fold(str) {
+    return str.toLowerCase().normalize ? str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '') : str.toLowerCase();
+  }
+
+  function openPicker() {
+    $('pickerFilter').value = '';
+    $('pickerBack').hidden = !me;
+    renderPicker();
+    show('picker');
+    window.scrollTo(0, 0);
+  }
+
+  function renderPicker() {
+    var q = fold($('pickerFilter').value.trim());
+    var list = $('pickerList');
+    list.textContent = '';
+    state.players
+      .slice()
+      .sort(function (x, y) { return cmp(x.name, y.name); })
+      .filter(function (p) { return !q || fold(p.name).indexOf(q) !== -1; })
+      .forEach(function (p) {
+        var li = el('li');
+        var b = el('button', '', p.name);
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          me = p.id;
+          store.set(KEY_ME, me);
+          render();
+          show('app');
+          window.scrollTo(0, 0);
+        });
+        li.appendChild(b);
+        list.appendChild(li);
+      });
+  }
+
+  /* ---------- Atburðir ---------- */
+
+  $('gateForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var val = $('codeInput').value.trim();
+    if (!val) { $('gateError').textContent = 'Sláðu inn kóðann.'; return; }
+    $('gateBtn').disabled = true;
+    $('gateError').textContent = '';
+    api('getState', val).then(function (s) {
+      if (!s.ok) { $('gateError').textContent = s.message || 'Rangur kóði. Reyndu aftur.'; return; }
+      code = val;
+      store.set(KEY_CODE, val);
+      $('codeInput').value = '';
+      accept(s);
+    }).catch(function () {
+      $('gateError').textContent = 'Náði ekki sambandi. Reyndu aftur eftir smá stund.';
+    }).then(function () {
+      $('gateBtn').disabled = false;
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.seg-btn'), function (btn) {
+    btn.addEventListener('click', function () { choose(btn.getAttribute('data-status'), btn); });
+  });
+
+  $('guestMinus').addEventListener('click', function () {
+    if (myGuests() > 0) choose('Mæti', $('guestMinus'), myGuests() - 1);
+  });
+  $('guestPlus').addEventListener('click', function () {
+    if (myGuests() < maxGuests()) choose('Mæti', $('guestPlus'), myGuests() + 1);
+  });
+
+  $('addForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var val = $('addName').value.replace(/\s+/g, ' ').trim();
+    if (val.length < 2) { $('addError').textContent = 'Skrifaðu fullt nafn.'; return; }
+    $('addBtn').disabled = true;
+    $('addError').textContent = '';
+    api('addPlayer', code, val).then(function (s) {
+      if (!s.ok) {
+        if (handleDenied(s)) return;
+        $('addError').textContent = s.message;
+        return;
+      }
+      me = s.playerId;
+      store.set(KEY_ME, me);
+      $('addName').value = '';
+      accept(s);
+      window.scrollTo(0, 0);
+      toast('Nafninu þínu var bætt við');
+    }).catch(function () {
+      $('addError').textContent = 'Náði ekki sambandi. Reyndu aftur.';
+    }).then(function () {
+      $('addBtn').disabled = false;
+    });
+  });
+
+  $('fyiEdit').addEventListener('click', function () {
+    editingNote = true;
+    $('fyiInput').value = (state && state.note) ? state.note.text : '';
+    $('fyiError').textContent = '';
+    fyiCount();
+    renderFyi(state);
+    $('fyiInput').focus();
+  });
+  $('fyiCancel').addEventListener('click', function () {
+    editingNote = false;
+    renderFyi(state);
+  });
+  $('fyiInput').addEventListener('input', fyiCount);
+  $('fyiForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var val = $('fyiInput').value.trim();
+    $('fyiSave').disabled = true;
+    $('fyiError').textContent = '';
+    api('setNote', code, me, val).then(function (s) {
+      if (!s.ok) {
+        if (handleDenied(s)) return;
+        $('fyiError').textContent = s.message;
+        return;
+      }
+      editingNote = false;
+      accept(s);
+      toast(val ? 'FYI vistað' : 'FYI fjarlægt');
+    }).catch(function () {
+      $('fyiError').textContent = 'Náði ekki að vista. Athugaðu netið og reyndu aftur.';
+    }).then(function () {
+      $('fyiSave').disabled = false;
+    });
+  });
+
+  $('switchMe').addEventListener('click', openPicker);
+  $('pickerBack').addEventListener('click', function () { render(); show('app'); });
+  $('pickerFilter').addEventListener('input', renderPicker);
+  $('tab-list').addEventListener('click', function () { setTab('list'); });
+  $('tab-board').addEventListener('click', function () { setTab('board'); });
+  $('refresh').addEventListener('click', function () { refresh(false); });
+  $('retry').addEventListener('click', firstLoad);
+  $('logout').addEventListener('click', function () {
+    me = '';
+    store.del(KEY_ME);
+    toGate('');
+  });
+
+  setInterval(function () {
+    if (document.visibilityState === 'visible' && !$('app').hidden) refresh(true);
+  }, POLL_MS);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !$('app').hidden && Date.now() - lastLoad > 20000) refresh(true);
+  });
+
+  if (code) firstLoad();
+  else toGate('');
+})();
+</script>
+</body>
+</html>
